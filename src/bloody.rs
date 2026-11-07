@@ -1,7 +1,4 @@
 use hidapi::HidApi;
-use windows_sys::Win32::UI::WindowsAndMessaging::{
-    SystemParametersInfoW, SPIF_SENDCHANGE, SPIF_UPDATEINIFILE, SPI_SETMOUSESPEED,
-};
 
 pub const A4TECH_VID: u16 = 0x09DA;
 
@@ -35,8 +32,12 @@ pub fn check_bloody_device() -> BloodyStatus {
     }
 }
 
-pub fn set_windows_sensitivity(speed: u32) -> bool {
-    // Speed is clamped to 1..20 (standard Windows sensitivity)
+#[cfg(windows)]
+pub fn set_platform_sensitivity(speed: u32) -> bool {
+    use windows_sys::Win32::UI::WindowsAndMessaging::{
+        SystemParametersInfoW, SPIF_SENDCHANGE, SPIF_UPDATEINIFILE, SPI_SETMOUSESPEED,
+    };
+
     let speed = speed.clamp(1, 20);
     unsafe {
         let res = SystemParametersInfoW(
@@ -49,7 +50,28 @@ pub fn set_windows_sensitivity(speed: u32) -> bool {
     }
 }
 
-// Convert DPI to equivalent Windows sensitivity level (1..20) for smooth scaling
+#[cfg(target_os = "linux")]
+pub fn set_platform_sensitivity(speed: u32) -> bool {
+    // On Linux, sensitivity can be tuned via xinput or libinput
+    // Speed range 1..20 maps to libinput accel -1.0 .. 1.0
+    let speed = speed.clamp(1, 20);
+    let accel = (speed as f32 - 10.0) / 10.0; // 10 is normal (0.0)
+    let _ = std::process::Command::new("sh")
+        .arg("-c")
+        .arg(format!(
+            "xinput --set-prop 'pointer:A4Tech Bloody Gaming Mouse' 'libinput Accel Speed' {:.2} 2>/dev/null",
+            accel
+        ))
+        .spawn();
+    true
+}
+
+#[cfg(not(any(windows, target_os = "linux")))]
+pub fn set_platform_sensitivity(_speed: u32) -> bool {
+    true
+}
+
+// Convert DPI to equivalent sensitivity level (1..20) for smooth scaling
 pub fn dpi_to_sensitivity(dpi: u32) -> u32 {
     match dpi {
         0..=600 => 6,

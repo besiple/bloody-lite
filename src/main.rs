@@ -1,11 +1,11 @@
-#![windows_subsystem = "windows"]
+#![cfg_attr(windows, windows_subsystem = "windows")]
 
 mod bloody;
 mod config;
 mod hook;
 mod keys;
 
-use bloody::{check_bloody_device, dpi_to_sensitivity, set_windows_sensitivity, BloodyStatus};
+use bloody::{check_bloody_device, dpi_to_sensitivity, set_platform_sensitivity, BloodyStatus};
 use config::AppConfig;
 use eframe::egui::{self, Color32, RichText, Vec2};
 use hook::{start_mouse_hook, HookState};
@@ -34,7 +34,7 @@ impl BloodyLiteApp {
 
         // Apply saved DPI sensitivity
         let sens = dpi_to_sensitivity(config.dpi);
-        set_windows_sensitivity(sens);
+        set_platform_sensitivity(sens);
 
         Self {
             config,
@@ -48,7 +48,7 @@ impl BloodyLiteApp {
     fn apply_dpi(&mut self, dpi: u32) {
         self.config.dpi = dpi;
         let sens = dpi_to_sensitivity(dpi);
-        set_windows_sensitivity(sens);
+        set_platform_sensitivity(sens);
         let _ = self.config.save();
         self.status_message = format!("Установлен DPI: {}", dpi);
     }
@@ -125,8 +125,20 @@ impl eframe::App for BloodyLiteApp {
                         .strong(),
                 );
                 ui.label(
-                    RichText::new("v0.1.0")
+                    RichText::new("v0.2.0")
                         .color(Color32::from_rgb(120, 120, 120))
+                        .small(),
+                );
+                #[cfg(target_os = "linux")]
+                ui.label(
+                    RichText::new("🐧 Linux")
+                        .color(Color32::from_rgb(255, 215, 0))
+                        .small(),
+                );
+                #[cfg(windows)]
+                ui.label(
+                    RichText::new("🪟 Windows")
+                        .color(Color32::from_rgb(100, 180, 255))
                         .small(),
                 );
             });
