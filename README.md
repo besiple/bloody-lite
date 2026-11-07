@@ -4,6 +4,17 @@
 
 Потребляет **~15 МБ RAM** вместо **~280 МБ** и работает без фонового мусора, служб и лишних модулей.
 
+[![Download](https://img.shields.io/github/v/release/besiple/bloody-lite?label=%D0%A1%D0%BA%D0%B0%D1%87%D0%B0%D1%82%D1%8C%20exe&color=red)](https://github.com/besiple/bloody-lite/releases/latest)
+
+---
+
+## 📥 Скачать
+
+Готовый файл можно скачать в один клик со страницы релизов:
+👉 **[Скачать bloody-lite.exe (v0.1.0)](https://github.com/besiple/bloody-lite/releases/latest)**
+
+*Установка не требуется — просто скачайте `.exe` и запустите.*
+
 ---
 
 ## 🎯 Возможности
